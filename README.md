@@ -55,6 +55,19 @@ aws iam list-instance-profiles-for-role --role-name Stream-RW-IAM-Role --profile
 elastic cloud instance config
 -----------------------------
 
+[create an instance](http://docs.aws.amazon.com/cli/latest/userguide/cli-ec2-launch.html#launching-instances)
+------------------
+
+```
+aws ec2 describe-security-groups --profile aws-creds-federated --region us-west-2
+aws ec2 describe-subnets --profile aws-creds-federated --region us-west-2
+
+aws ec2 create-key-pair --region us-west-2 --key-name api-staging --profile aws-creds-federated
+
+
+aws ec2 run-instances --image-id ami-9abea4fb --count 1 --instance type t2.micro --key-name api-staging --security-group-ids sg-5491da2c --subnet-id subnet-897ecbee --region us-west-2 --profile aws-creds-federated
+```
+
 - [attach Stream Identity Role to elastic cloud instance](http://docs.aws.amazon.com/cli/latest/reference/iam/add-role-to-instance-profile.html)
 
 ```bash
@@ -93,3 +106,6 @@ http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_ins
 http://docs.aws.amazon.com/codedeploy/latest/userguide/getting-started-create-iam-instance-profile.html
 
 http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html
+
+https://aws.amazon.com/blogs/security/demystifying-ec2-resource-level-permissions/
+
