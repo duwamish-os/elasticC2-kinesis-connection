@@ -4,6 +4,7 @@ import java.io.IOException
 import java.util.{Optional, Properties}
 
 import com.amazonaws.ClientConfiguration
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.Regions
 import com.amazonaws.services.kinesis.AmazonKinesisClient
@@ -79,7 +80,8 @@ class KinesisEventStreamConfig {
     clientConfiguration
   }
 
-  private def getAuthProfileCredentials(): ProfileCredentialsProvider = {
-    new ProfileCredentialsProvider(config.getProperty("authentication.profile"))
+  private def getAuthProfileCredentials(): DefaultAWSCredentialsProviderChain = {
+    System.setProperty("aws.profile", config.getProperty("authentication.profile"))
+    new DefaultAWSCredentialsProviderChain
   }
 }
