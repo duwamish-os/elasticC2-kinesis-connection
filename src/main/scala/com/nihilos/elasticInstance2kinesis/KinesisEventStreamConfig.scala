@@ -81,7 +81,9 @@ class KinesisEventStreamConfig {
   }
 
   private def getAuthProfileCredentials(): DefaultAWSCredentialsProviderChain = {
-    System.setProperty("aws.profile", config.getProperty("authentication.profile"))
+    Option(config.getProperty("authentication.profile")).map(profile =>
+    System.setProperty("aws.profile", config.getProperty("authentication.profile")))
+
     new DefaultAWSCredentialsProviderChain
   }
 }
