@@ -112,13 +112,27 @@ elastic cloud instance config
 ```bash
 aws ec2 describe-vpcs --region us-west-2 --profile aws-creds--federated ## there would be one VirtualPrivateCloud
 
-#VirtualPrivateCloudId + sGroupId
+# VirtualPrivateCloudId + sGroupId
 aws ec2 describe-security-groups --profile aws-creds-federated --region us-west-2
 
-#4 subnets for VirtualPrivateCloud + SubnetId + AvailabilityZone(2a and 2b)
+# 4 subnets for VirtualPrivateCloud + SubnetId + AvailabilityZone(2a and 2b)
 aws ec2 describe-subnets --profile aws-creds-federated --region us-west-2 
 
+# create KeyPair
 aws ec2 create-key-pair --region us-west-2 --key-name api-staging --profile aws-creds-federated
+#aws ec2 delete-key-pair --key-name consumer-staging --profile aws-creds-federated --region us-west-2
+# http://stackoverflow.com/a/11776183/432903
+
+# http://docs.aws.amazon.com/cli/latest/userguide/cli-ec2-keypairs.html
+aws ec2 describe-key-pairs --key-name api-staging --profile aws-creds-federated --region us-west-2
+{
+    "KeyPairs": [
+        {
+            "KeyName": "api-staging", 
+            "KeyFingerprint": "0b:c9:b8:b3:8f:a9:de:36:88:9c:1c:6f:3a:f3:4d:32:54:8a:e4:3b"
+        }
+    ]
+}
 
 
 #redhat - ami-6f68cf0f
@@ -218,13 +232,112 @@ aws ec2 run-instances --image-id ami-6f68cf0f --count 1 --instance-type t2.large
 aws ec2 modify-instance-attribute --instance-id i-05f86d5876b06acf7 --instance-type "{\"Value\": \"t2.large\"}" --region us-west-2 --profile aws-creds-federated
 ```
 
-- [attach Stream Identity Role to elastic cloud instance](http://docs.aws.amazon.com/cli/latest/reference/iam/add-role-to-instance-profile.html)
 
-https://aws.amazon.com/blogs/security/new-attach-an-aws-iam-role-to-an-existing-amazon-ec2-instance-by-using-the-aws-cli/
+[attach `Stream Identity Role` to elastic cloud instance](http://docs.aws.amazon.com/cli/latest/reference/iam/add-role-to-instance-profile.html)
+
+[Attach an AWS IAM Role to an Existing Amazon EC2 Instance by Using the AWS CLI](https://aws.amazon.com/blogs/security/new-attach-an-aws-iam-role-to-an-existing-amazon-ec2-instance-by-using-the-aws-cli/)
 
 
 ```bash
-aws iam add-role-to-instance-profile --role-name Stream-RW-IAM-Role --instance-profile-name AIPAIWEWPMRBPJ7XON6FI
+aws iam create-instance-profile --instance-profile-name Stream-ConsumerOffset-Instance-Profile --profile aws-creds-federated
+{
+    "InstanceProfile": {
+        "InstanceProfileId": "AIPAIALC2SATSPZZPOAYU", 
+        "Roles": [], 
+        "CreateDate": "2017-04-03T08:06:17.241Z", 
+        "InstanceProfileName": "Stream-ConsumerOffset-Instance-Profile", 
+        "Path": "/", 
+        "Arn": "arn:aws:iam::033814027302:instance-profile/Stream-ConsumerOffset-Instance-Profile"
+    }
+}
+
+aws iam add-role-to-instance-profile --role-name Stream-RW-IAM-Role --instance-profile-name Stream-ConsumerOffset-Instance-Profile --profile aws-creds-federated
+
+#then associate a instance profile
+aws ec2 associate-iam-instance-profile --instance-id i-05f86d5876b06acf7 --iam-instance-profile Name=Stream-ConsumerOffset-Instance-Profile --region us-west-2 --profile aws-creds-federated
+{
+    "IamInstanceProfileAssociation": {
+        "InstanceId": "i-05f86d5876b06acf7", 
+        "State": "associated", 
+        "AssociationId": "iip-assoc-091fd14921e7e8ff6", 
+        "IamInstanceProfile": {
+            "Id": "AIPAIALC2SATSPZZPOAYU", 
+            "Arn": "arn:aws:iam::033814027302:instance-profile/Stream-ConsumerOffset-Instance-Profile"
+        }
+    }
+}
+
+#list instance-profiles
+aws iam list-instance-profiles --profile aws-creds-federated
+{
+    "InstanceProfiles": [
+        {
+            "InstanceProfileId": "AIPAIALC2SATSPZZPOAYU", 
+            "Roles": [
+                {
+                    "AssumeRolePolicyDocument": {
+                        "Version": "2012-10-17", 
+                        "Statement": [
+                            {
+                                "Action": "sts:AssumeRole", 
+                                "Effect": "Allow", 
+                                "Principal": {
+                                    "Service": "ec2.amazonaws.com"
+                                }
+                            }
+                        ]
+                    }, 
+                    "RoleId": "AROAIUQKPZ3NS2DZLU3QG", 
+                    "CreateDate": "2017-04-02T22:33:33Z", 
+                    "RoleName": "Stream-RW-IAM-Role", 
+                    "Path": "/", 
+                    "Arn": "arn:aws:iam::033814027302:role/Stream-RW-IAM-Role"
+                }
+            ], 
+            "CreateDate": "2017-04-03T08:06:17Z", 
+            "InstanceProfileName": "Stream-ConsumerOffset-Instance-Profile", 
+            "Path": "/", 
+            "Arn": "arn:aws:iam::033814027302:instance-profile/Stream-ConsumerOffset-Instance-Profile"
+        }
+    ]
+}
+
+
+#list profiles for ec2 instance
+#http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-iam-instance-profile-associations.html
+
+aws ec2 describe-iam-instance-profile-associations --region us-west-2 --profile aws-creds-federated
+{
+    "IamInstanceProfileAssociations": [
+        {
+            "InstanceId": "i-05f86d5876b06acf7", 
+            "State": "associated", 
+            "AssociationId": "iip-assoc-091fd14921e7e8ff6", 
+            "IamInstanceProfile": {
+                "Id": "AIPAIALC2SATSPZZPOAYU", 
+                "Arn": "arn:aws:iam::033814027302:instance-profile/Stream-ConsumerOffset-Instance-Profile"
+            }
+        }
+    ]
+}
+
+#filter by instance-id
+
+aws ec2 describe-iam-instance-profile-associations --region us-west-2 --filters Name=instance-id,Values=i-05f86d5876b06acf7 --profile aws-creds-federated 
+{
+    "IamInstanceProfileAssociations": [
+        {
+            "InstanceId": "i-05f86d5876b06acf7", 
+            "State": "associated", 
+            "AssociationId": "iip-assoc-091fd14921e7e8ff6", 
+            "IamInstanceProfile": {
+                "Id": "AIPAIALC2SATSPZZPOAYU", 
+                "Arn": "arn:aws:iam::033814027302:instance-profile/Stream-ConsumerOffset-Instance-Profile"
+            }
+        }
+    ]
+}
+
 ```
 
 ```bash
@@ -237,6 +350,55 @@ aws iam add-role-to-instance-profile --role-name Stream-RW-IAM-Role --instance-p
 }
 ```
 
+```bash
+aws ec2 describe-volumes --profile aws-creds-federated --region us-west-2
+{
+    "Volumes": [
+        {
+            "AvailabilityZone": "us-west-2b", 
+            "Attachments": [
+                {
+                    "AttachTime": "2017-04-02T22:11:19.000Z", 
+                    "InstanceId": "i-05f86d5876b06acf7", 
+                    "VolumeId": "vol-090e161e6d737cea8", 
+                    "State": "attached", 
+                    "DeleteOnTermination": true, 
+                    "Device": "/dev/sda1"
+                }
+            ], 
+            "Encrypted": false, 
+            "VolumeType": "gp2", 
+            "VolumeId": "vol-090e161e6d737cea8", 
+            "State": "in-use", 
+            "Iops": 100, 
+            "SnapshotId": "snap-5ab96e76", 
+            "CreateTime": "2017-04-02T22:11:19.323Z", 
+            "Size": 10
+        }
+    ]
+}
+
+# detach volume
+aws ec2 detach-volume --volume-id vol-090e161e6d737cea8 --profile aws-creds-federated --region us-west-2
+{
+    "AttachTime": "2017-04-02T22:11:19.000Z", 
+    "InstanceId": "i-05f86d5876b06acf7", 
+    "VolumeId": "vol-090e161e6d737cea8", 
+    "State": "detaching", 
+    "Device": "/dev/sda1"
+}
+
+#re-attach
+aws ec2 attach-volume --volume-id vol-090e161e6d737cea8 --instance-id i-05f86d5876b06acf7 --device /dev/sdf --region us-west-2 --profile aws-creds-federated 
+{
+    "AttachTime": "2017-04-03T09:42:01.147Z", 
+    "InstanceId": "i-05f86d5876b06acf7", 
+    "VolumeId": "vol-090e161e6d737cea8", 
+    "State": "attaching", 
+    "Device": "/dev/sdf"
+}
+
+```
 
 describe-instances
 
@@ -245,7 +407,11 @@ describe-instances
 #describe all
 aws ec2 describe-instances --profile aws-creds-federated --region us-west-2
 
-aws ec2 describe-instances --profile aws-creds--federated --region us-west-2 --instance-ids i-0e668c9c64c21f504
+#filter by vmId
+aws ec2 describe-instances --profile aws-creds-federated --region us-west-2 --instance-ids i-05f86d5876b06acf7
+
+#filter by name
+aws ec2 describe-instances --profile aws-creds-federated --region us-west-2 --filters Name=tag:Name,Values=Consumer --output table
 
  {
             "OwnerId": "033814027302", 
@@ -350,7 +516,7 @@ aws ec2 describe-instances --profile aws-creds--federated --region us-west-2 --i
         
 ```
 
-Stop instance
+[Stop instance]()
 
 ```bash
 aws ec2 stop-instances --instance-ids i-05f86d5876b06acf7 --profile aws-creds-federated --region us-west-2
@@ -371,6 +537,26 @@ aws ec2 stop-instances --instance-ids i-05f86d5876b06acf7 --profile aws-creds-fe
 }
 ```
 
+[start instance]()
+
+```bash
+aws ec2 start-instances --instance-ids i-0e668c9c64c21f504 --region us-west-2 --profile aws-creds-federated
+{
+    "StartingInstances": [
+        {
+            "InstanceId": "i-0e668c9c64c21f504", 
+            "CurrentState": {
+                "Code": 0, 
+                "Name": "pending"
+            }, 
+            "PreviousState": {
+                "Code": 80, 
+                "Name": "stopped"
+            }
+        }
+    ]
+}
+```
 run artifact on elastic compute
 -------------------------------
 
@@ -398,6 +584,8 @@ https://aws.amazon.com/blogs/security/demystifying-ec2-resource-level-permission
 https://cloudranger.com/how-to-configure-the-aws-cli-and-launch-an-ec2-instance/
 
 https://coderwall.com/p/ndm54w/creating-an-ec2-instance-in-a-vpc-with-the-aws-command-line-interface
+
+http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/virtualization_types.html
 
 Troubleshoot
 ------------
