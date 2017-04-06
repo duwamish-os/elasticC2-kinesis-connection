@@ -50,6 +50,8 @@ create instance stack
 aws cloudformation create-stack --stack-name streaming-server --template-body file://StreamingCloudInstance.json --profile aws-federated --region us-west-2
 ```
 
+![cloud_formation_instance.png](cloud_formation_instance.png)
+
 http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
 
 [Amazon EC2 Template Snippets](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-ec2.html)
