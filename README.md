@@ -651,6 +651,12 @@ run artifact on elastic compute
 -------------------------------
 
 ```
+yum install wget
+
+wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u60-b27/jdk-8u60-linux-x64.rpm"
+
+sudo yum -y localinstall jdk-8u60-linux-x64.rpm
+
 wget https://dl.bintray.com/sbt/native-packages/sbt/0.13.13/sbt-0.13.13.tgz
 
 sbt-launcher-packaging-0.13.13/bin/sbt test
