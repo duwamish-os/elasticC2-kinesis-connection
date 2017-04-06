@@ -52,6 +52,13 @@ aws cloudformation create-stack --stack-name streaming-server --template-body fi
 
 ![cloud_formation_instance.png](cloud_formation_instance.png)
 
-http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+Resources
+-----------
+
+http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-kinesis-stream.html
+
+[aws-resource-iam-role](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html)
 
 [Amazon EC2 Template Snippets](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/quickref-ec2.html)
+
+[](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-instanceprofile.html)

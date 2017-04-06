@@ -1,16 +1,26 @@
 {
    "AWSTemplateFormatVersion" : "2010-09-09",
-   "Description" : "streaming-server",
+   "Description" : "streaming-server-stack",
    "Resources" : {
+      "StreamingInstanceProfile" : {
+          "Type" : "AWS::IAM::InstanceProfile",
+          "Properties" : {
+              "Path" : "/",
+              "Roles" : ["StreamingAccessRole-StreamingAccessRole-C1GT0WVFBUOH"]
+          }
+      },
       "StreamingCloudInstance" : {
          "Type" : "AWS::EC2::Instance",
          "Properties" : {
+            "Tags" : [ { "Key" : "Name", "Value" : "streaming-server" } ],
             "ImageId" : "ami-6f68cf0f",
             "KeyName" : "api-staging",
-            "InstanceType" : "t2.micro",
+            "InstanceType" : "t2.large",
             "SecurityGroupIds" : ["sg-5491da2c"],
             "SubnetId" : "subnet-8c7ecbeb",
-            "Tags" : [ { "Key" : "Name", "Value" : "streaming-server" } ]
+            "IamInstanceProfile" : { 
+               "Ref" : "StreamingInstanceProfile"
+            }
          }
       }
    }
