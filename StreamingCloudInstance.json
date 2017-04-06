@@ -1,0 +1,17 @@
+{
+   "AWSTemplateFormatVersion" : "2010-09-09",
+   "Description" : "streaming-server",
+   "Resources" : {
+      "StreamingCloudInstance" : {
+         "Type" : "AWS::EC2::Instance",
+         "Properties" : {
+            "ImageId" : "ami-6f68cf0f",
+            "KeyName" : "api-staging",
+            "InstanceType" : "t2.micro",
+            "SecurityGroupIds" : ["sg-5491da2c"],
+            "SubnetId" : "subnet-8c7ecbeb",
+            "Tags" : [ { "Key" : "Name", "Value" : "streaming-server" } ]
+         }
+      }
+   }
+}

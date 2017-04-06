@@ -112,15 +112,105 @@ elastic cloud instance config
 ```bash
 aws ec2 describe-vpcs --region us-west-2 --profile aws-creds--federated ## there would be one VirtualPrivateCloud
 
-# VirtualPrivateCloudId + sGroupId
+# VirtualPrivateCloudId + sGroupId (could be n number of sgs)
 aws ec2 describe-security-groups --profile aws-creds-federated --region us-west-2
 
+aws ec2 describe-security-groups --group-id sg-5491da2c --region us-west-2 --profile aws-creds-federated
+{
+    "SecurityGroups": [
+        {
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1", 
+                    "PrefixListIds": [], 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ], 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": []
+                }
+            ], 
+            "Description": "nihilos sg", 
+            "IpPermissions": [
+                {
+                    "PrefixListIds": [], 
+                    "FromPort": 80, 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.0.0.0/8"
+                        }, 
+                        {
+                            "CidrIp": "172.0.0.0/8"
+                        }, 
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ], 
+                    "ToPort": 80, 
+                    "IpProtocol": "tcp", 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": [
+                        {
+                            "CidrIpv6": "::/0"
+                        }
+                    ]
+                }, 
+                {
+                    "PrefixListIds": [], 
+                    "FromPort": 8080, 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }, 
+                        {
+                            "CidrIp": "161.181.253.20/32"
+                        }
+                    ], 
+                    "ToPort": 8080, 
+                    "IpProtocol": "tcp", 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": [
+                        {
+                            "CidrIpv6": "::/0"
+                        }
+                    ]
+                }, 
+                {
+                    "PrefixListIds": [], 
+                    "FromPort": 22, 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.0.0.0/8"
+                        }, 
+                        {
+                            "CidrIp": "172.16.0.0/12"
+                        }
+                    ], 
+                    "ToPort": 22, 
+                    "IpProtocol": "tcp", 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": []
+                }
+            ], 
+            "GroupName": "nihilos-test", 
+            "VpcId": "vpc-5374e434", 
+            "OwnerId": "033814027302", 
+            "GroupId": "sg-5491da2c"
+        }
+    ]
+}
+
+
 # 4 subnets for VirtualPrivateCloud + SubnetId + AvailabilityZone(2a and 2b)
+# https://en.wikipedia.org/wiki/Subnetwork
+
 aws ec2 describe-subnets --profile aws-creds-federated --region us-west-2 
 
 # create KeyPair
 aws ec2 create-key-pair --region us-west-2 --key-name api-staging --profile aws-creds-federated
-#aws ec2 delete-key-pair --key-name consumer-staging --profile aws-creds-federated --region us-west-2
+# aws ec2 delete-key-pair --key-name consumer-staging --profile aws-creds-federated --region us-west-2
 # http://stackoverflow.com/a/11776183/432903
 
 # http://docs.aws.amazon.com/cli/latest/userguide/cli-ec2-keypairs.html
