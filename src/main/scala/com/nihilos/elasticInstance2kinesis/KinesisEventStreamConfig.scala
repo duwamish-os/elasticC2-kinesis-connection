@@ -5,7 +5,8 @@ import java.util.{Optional, Properties}
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
-import com.amazonaws.regions.Regions
+import com.amazonaws.regions.{Region, Regions}
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient}
 import com.amazonaws.services.kinesis.AmazonKinesisClient
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.{InitialPositionInStream, KinesisClientLibConfiguration}
 
@@ -49,6 +50,14 @@ class KinesisEventStreamConfig {
     kinesisClientConfiguration
   }
 
+  def getOffsetConnection() : AmazonDynamoDB = {
+    val dynamoDB = new AmazonDynamoDBClient(getAuthProfileCredentials(), getHttpConfiguration())
+
+    Option(getStreamRegions().get()).map(x => dynamoDB.setRegion(Region.getRegion(x)))
+
+    dynamoDB
+  }
+
   protected def getStreamRegions(): Optional[Regions] = {
 
     val regionOpt = Optional.ofNullable(config.getProperty("stream.region"))
@@ -69,7 +78,7 @@ class KinesisEventStreamConfig {
     val clientConfiguration = new ClientConfiguration()
 
     if (httpProxyhost.isPresent()) {
-      clientConfiguration.setProxyHost(httpProxyhost.get());
+      clientConfiguration.setProxyHost(httpProxyhost.get())
     }
 
     if (httpProxyPort.isPresent()) {
