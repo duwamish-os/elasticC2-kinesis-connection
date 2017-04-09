@@ -1,4 +1,91 @@
 
+[create security group](http://stackoverflow.com/a/28556843/432903)
+-----------------------
+
+```bash
+aws ec2 describe-vpcs --region us-west-2 --profile aws-federated
+
+aws ec2 create-security-group --group-name Endpoint-Security-Group --description "Streaming Endpoint sg" --vpc-id vpc-a77a82c2 --profile aws-federated
+
+# allow ssh
+aws ec2 authorize-security-group-ingress --group-id sg-1326eb68 --protocol tcp --port 22 --cidr 10.0.0.0/8 --region us-west-2 --profile aws-federated
+
+aws ec2 authorize-security-group-ingress --group-id sg-1326eb68 --protocol tcp --port 80 --cidr 10.0.0.0/8 --region us-west-2 --profile aws-federated
+
+aws ec2 describe-security-groups --group-ids sg-1326eb68 --region us-west-2 --profile aws-federated
+{
+    "SecurityGroups": [
+        {
+            "IpPermissionsEgress": [
+                {
+                    "IpProtocol": "-1", 
+                    "PrefixListIds": [], 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ], 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": []
+                }
+            ], 
+            "Description": "Streaming Endpoint Security Group", 
+            "Tags": [
+                {
+                    "Value": "secure endpoint", 
+                    "Key": "Name"
+                }, 
+                {
+                    "Value": "https://confluence.nordstrom.net/display/AWS/Security+Groups", 
+                    "Key": "SGRemediated"
+                }
+            ], 
+            "IpPermissions": [
+                {
+                    "PrefixListIds": [], 
+                    "FromPort": 80, 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "0.0.0.0/0"
+                        }
+                    ], 
+                    "ToPort": 80, 
+                    "IpProtocol": "tcp", 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": [
+                        {
+                            "CidrIpv6": "::/0"
+                        }
+                    ]
+                }, 
+                {
+                    "PrefixListIds": [], 
+                    "FromPort": 22, 
+                    "IpRanges": [
+                        {
+                            "CidrIp": "10.0.0.0/8"
+                        }
+                    ], 
+                    "ToPort": 22, 
+                    "IpProtocol": "tcp", 
+                    "UserIdGroupPairs": [], 
+                    "Ipv6Ranges": [
+                        {
+                            "CidrIpv6": "::/0"
+                        }
+                    ]
+                }
+            ], 
+            "GroupName": "sgStreamingEndpoint", 
+            "VpcId": "vpc-a77a82c2", 
+            "OwnerId": "500238854089", 
+            "GroupId": "sg-1326eb68"
+        }
+    ]
+}
+
+```
+
 create access-role stack
 --
 
@@ -10,7 +97,7 @@ aws cloudformation delete-stack --stack-name streaming-access --region us-west-2
 ```
 
 ```bash
-aws cloudformation create-stack --stack-name streaming-access-role --template-body file://StreamingAccessRoleCF.json --profile creds-federated --region us-west-2 --capabilities CAPABILITY_IAM
+aws cloudformation create-stack --stack-name streaming-access-role-stack --template-body file://StreamingAccessRoleCF.json --profile creds-federated --region us-west-2 --capabilities CAPABILITY_IAM
 {
     "StackId": "arn:aws:cloudformation:us-west-2:033814027302:stack/streaming-access-role/4c2718b0-1a61-11e7-903b-503ac931688d"
 }

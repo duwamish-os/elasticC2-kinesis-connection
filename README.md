@@ -3,6 +3,7 @@ elastic compute cloud (ec2) to kinesis-stream connection example
 
 1 - [amazonwebservice cli](https://github.com/aws/aws-cli#installation)
 -----------------------------------------------------------------------
+
 ```bash
 sudo pip install awscli
 ```
@@ -66,7 +67,7 @@ aws iam attach-role-policy --role-name StreamOffset-RW-IAM-Role --policy-arn arn
 
 ```bash
 aws iam list-roles --profile aws_creds_federated
-aws iam list-policies --profile aws_creds_federated ## will list the Stream-RW-IAM-Role
+aws iam list-policies --profile aws_creds_federated ## | grep x => will list the Stream-RW-IAM-Role
 {
     "Policies": [
         {
@@ -94,6 +95,7 @@ aws iam list-policies --profile aws_creds_federated ## will list the Stream-RW-I
      ]
 }
 
+aws iam list-role-policies --role-name a0135-streaming-access-role-st-StreamingAccessRole-14QHMTIOIRN5X --region us-west-2 --profile aws-federated
 ```
 
 ```bash
@@ -651,7 +653,10 @@ run artifact on elastic compute
 -------------------------------
 
 ```
-yum install wget
+
+yum -y update
+yum -y install git
+yum -y install wget
 
 wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u60-b27/jdk-8u60-linux-x64.rpm"
 

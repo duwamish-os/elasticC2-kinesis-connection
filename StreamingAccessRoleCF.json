@@ -1,33 +1,71 @@
 {
-   "AWSTemplateFormatVersion": "2010-09-09",
-   "Resources": {
-      "StreamingAccessRole": {
-         "Type": "AWS::IAM::Role",
-         "Properties": {
-            "AssumeRolePolicyDocument": {
-               "Version" : "2012-10-17",
-               "Statement": [ {
-                  "Effect": "Allow",
-                  "Principal": {
-                     "Service": [ "ec2.amazonaws.com" ]
-                  },
-                  "Action": [ "sts:AssumeRole" ]
-               } ]
-            },
-            "Path": "/",
-            "Policies": [ {
-               "PolicyName": "StreamRWAccessPolicy",
-               "PolicyDocument": {
-                  "Version" : "2012-10-17",
-                  "Statement": [ {
-                     "Effect": "Allow",
-                     "Action": "kinesis:*",
-                     "Resource": "*"
-                  } ]
-               }
-               } ]
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Streaming access",
+  "Parameters": {
+    "teamIdentifier": {
+      "Type": "String",
+      "Default": "28",
+      "Description": "Identifier for the team"
+    }
+  },
+  "Resources": {
+    "StreamingAccessMgmtRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName" : "a0135-StreamingAccessMgmtRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
             }
+          ]
+        },
+        "Path": "/a0135/",
+        "Policies": [
+          {
+            "PolicyName": "StreamConsumerOffsetRWAccessPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                   "Effect": "Allow",
+                   "Action": [
+                      "sts:AssumeRole"
+                   ],
+                   "Resource": "arn:aws:iam::500238854089:role/a0135-/*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "kinesis:*",
+                  "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action" : ["dynamodb:CreateTable",
+                              "dynamodb:PutItem",
+                              "dynamodb:UpdateItem",
+                              "dynamodb:DeleteItem",
+                              "dynamodb:GetItem",
+                              "dynamodb:ListTables",
+                              "dynamodb:GetRecords",
+                              "dynamodb:DeleteTable",
+                              "dynamodb:GetShardIterator"],
+                  "Resource" : "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+                }
+              ]
+            }
+          }
+        ]
       }
-   }
+    }
+  }
 }
-
