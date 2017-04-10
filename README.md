@@ -112,9 +112,56 @@ elastic cloud instance config
 ------------------
 
 ```bash
-aws ec2 describe-vpcs --region us-west-2 --profile aws-creds--federated ## there would be one VirtualPrivateCloud
+aws ec2 describe-vpcs --region us-west-2 --profile aws-creds-federated ## there would be one VirtualPrivateCloud
+
+## whats the Classless IDR block of given vpc your ec2 VM is on? - 172.23.0.0/16
+aws ec2 describe-vpcs --vpc-ids vpc-a77a82c2 --region us-west-2 --profile aws-federated
+{
+    "Vpcs": [
+        {
+            "VpcId": "vpc-a77a82c2", 
+            "InstanceTenancy": "default", 
+            "Tags": [
+                {
+                    "Value": "staging-env", 
+                    "Key": "Environment"
+                }, 
+                {
+                    "Value": "VPC", 
+                    "Key": "aws:cloudformation:logical-id"
+                }, 
+                {
+                    "Value": "vpc_staging-env", 
+                    "Key": "Name"
+                }, 
+                {
+                    "Value": "VPN Connected VPC", 
+                    "Key": "Network"
+                }, 
+                {
+                    "Value": "arn:aws:cloudformation:us-west-2:500238854089:stack/VPCStagingEnv/7d05fd50-1db8-11e4-a0df-50e2414b0a44", 
+                    "Key": "aws:cloudformation:stack-id"
+                }, 
+                {
+                    "Value": "VPCStagingEnv", 
+                    "Key": "aws:cloudformation:stack-name"
+                }, 
+                {
+                    "Value": "319", 
+                    "Key": "Connection"
+                }
+            ],
+            "State": "available", 
+            "DhcpOptionsId": "dopt-d26e81b7",
+            "CidrBlock": "172.23.0.0/16",
+            "IsDefault": false
+        }
+    ]
+}
 
 # VirtualPrivateCloudId + sGroupId (could be n number of sgs)
+# has all the firewall rules for ingress and egress
+
 aws ec2 describe-security-groups --profile aws-creds-federated --region us-west-2
 
 aws ec2 describe-security-groups --group-id sg-5491da2c --region us-west-2 --profile aws-creds-federated
@@ -205,10 +252,56 @@ aws ec2 describe-security-groups --group-id sg-5491da2c --region us-west-2 --pro
 }
 
 
-# 4 subnets for VirtualPrivateCloud + SubnetId + AvailabilityZone(2a and 2b)
+# 4 subnets for VirtualPrivateCloud(=datacenter) + SubnetId + AvailabilityZone(2a and 2b)
 # https://en.wikipedia.org/wiki/Subnetwork
 
-aws ec2 describe-subnets --profile aws-creds-federated --region us-west-2 
+aws ec2 describe-subnets --subnet-id subnet-bd67b2d8 --profile aws-federated --region us-west-2
+{
+    "Subnets": [
+        {
+            "VpcId": "vpc-a77a82c2", 
+            "Tags": [
+                {
+                    "Value": "arn:aws:cloudformation:us-west-2:500238854089:stack/VPCStaging01/7d05fd50-1db8-11e4-a0df-50e2414b0a44", 
+                    "Key": "aws:cloudformation:stack-id"
+                }, 
+                {
+                    "Value": "VPCStaging01", 
+                    "Key": "aws:cloudformation:stack-name"
+                }, 
+                {
+                    "Value": "none", 
+                    "Key": "internal-general"
+                }, 
+                {
+                    "Value": "InternalGeneralSubnet-AZ1", 
+                    "Key": "aws:cloudformation:logical-id"
+                }, 
+                {
+                    "Value": "staging-env", 
+                    "Key": "Environment"
+                }, 
+                {
+                    "Value": "subnet_staging-env_internal-general_az1",
+                    "Key": "Name"
+                }, 
+                {
+                    "Value": "internal-general", 
+                    "Key": "Network"
+                }
+            ],
+            "AvailableIpAddressCount": 16075,
+            "MapPublicIpOnLaunch": false,
+            "DefaultForAz": false,
+            "Ipv6CidrBlockAssociationSet": [],
+            "State": "available",
+            "AvailabilityZone": "us-west-2a",
+            "SubnetId": "subnet-bd67b2d8",
+            "CidrBlock": "172.23.0.0/18",
+            "AssignIpv6AddressOnCreation": false
+        }
+    ]
+}
 
 # create KeyPair
 aws ec2 create-key-pair --region us-west-2 --key-name api-staging --profile aws-creds-federated

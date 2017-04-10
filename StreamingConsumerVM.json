@@ -1,11 +1,11 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Ingestion API stack",
+  "Description": "Streaming consumer api stack",
   "Resources": {
-    "IngestionAccessMgmtRole": {
+    "StreamingConsumerAccessRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "a0135-IngestionAccessMgmtRole",
+        "RoleName": "a0135-StreamingConsumerAccessRole",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -25,7 +25,7 @@
         "Path": "/a0135/",
         "Policies": [
           {
-            "PolicyName": "IngestionRWAccessPolicy",
+            "PolicyName": "StreamingConsumerOffsetRWAccessPolicy",
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -44,27 +44,16 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                "dynamodb:BatchGetItem",
-                "dynamodb:BatchWriteItem",
-                "dynamodb:CreateTable",
-                "dynamodb:DeleteItem",
-                "dynamodb:DeleteTable",
-                "dynamodb:DescribeLimits",
-                "dynamodb:DescribeReservedCapacity",
-                "dynamodb:DescribeReservedCapacityOfferings",
-                "dynamodb:DescribeStream",
-                "dynamodb:DescribeTable",
-                "dynamodb:GetItem",
-                "dynamodb:GetRecords",
-                "dynamodb:GetShardIterator",
-                "dynamodb:ListStreams",
-                "dynamodb:ListTables",
-                "dynamodb:PutItem",
-                "dynamodb:Query",
-                "dynamodb:Scan",
-                "dynamodb:UpdateItem",
-                "dynamodb:UpdateTable"                  
-               ],
+                    "dynamodb:CreateTable",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:ListTables",
+                    "dynamodb:GetRecords",
+                    "dynamodb:DeleteTable",
+                    "dynamodb:GetShardIterator"
+                  ],
                   "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
                 }
               ]
@@ -73,34 +62,23 @@
         ]
       }
     },
-    "IngestionAPIFirewall" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "GroupDescription" : "Security group for the Ingestion-API",
-        "VpcId" : "vpc-6207ff07",
-        "SecurityGroupIngress" : [
-            {"IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0"},
-            {"IpProtocol" : "tcp", "FromPort" : 22, "ToPort" : 22, "CidrIp" : "10.0.0.0/8"}
-        ]
-      }
-    },
-    "IngestionInstanceVMProfile": {
+    "StreamingConsumerVMProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/a0135/",
-        "InstanceProfileName": "a0135-IngestionInstanceVMProfile",
+        "InstanceProfileName": "a0135-StreamingConsumerVMProfile",
         "Roles": [
-          "a0135-IngestionAccessMgmtRole"
+          "a0135-StreamingConsumerAccessRole"
         ]
       }
     },
-    "IngestionCloudInstance": {
+    "StreamingConsumerVM": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-ingestion-api"
+            "Value": "a0135-consumer-api"
           },
           {
             "Key": "Owner",
@@ -111,11 +89,11 @@
         "KeyName": "streaming-server",
         "InstanceType": "t2.large",
         "SecurityGroupIds": [
-          { "Ref" : "IngestionAPIFirewall" }
+          "sg-1326eb68"
         ],
-        "SubnetId": "subnet-d67baeb3",
+        "SubnetId": "subnet-bd67b2d8",
         "IamInstanceProfile": {
-          "Ref": "IngestionInstanceVMProfile"
+          "Ref": "StreamingConsumerVMProfile"
         }
       }
     }
