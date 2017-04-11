@@ -62,6 +62,17 @@
         ]
       }
     },
+    "ConsumerAPIFirewall" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Security group for the Consumer-API",
+        "VpcId" : "vpc-6207ff07",
+        "SecurityGroupIngress" : [
+            {"IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "10.0.0.0/8"},
+            {"IpProtocol" : "tcp", "FromPort" : 22, "ToPort" : 22, "CidrIp" : "10.0.0.0/8"}
+        ]
+      }
+    },
     "StreamingConsumerVMProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
@@ -89,9 +100,9 @@
         "KeyName": "streaming-server",
         "InstanceType": "t2.large",
         "SecurityGroupIds": [
-          "sg-1326eb68"
+          { "Ref" : "ConsumerAPIFirewall" }
         ],
-        "SubnetId": "subnet-bd67b2d8",
+        "SubnetId": "subnet-d67baeb3",
         "IamInstanceProfile": {
           "Ref": "StreamingConsumerVMProfile"
         }
