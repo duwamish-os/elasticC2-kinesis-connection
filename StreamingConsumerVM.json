@@ -1,11 +1,94 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Streaming consumer api stack",
+  "Description": "Streaming consumer api VM",
+  "Parameters": {
+    "environment": {
+      "Type": "String",
+      "Default": "staging",
+      "Description": "environment"
+    },
+    "vpcId": {
+      "Type": "String",
+      "Default": "vpc-6207ff07",
+      "Description": "Virtual Private Cloud"
+    },
+    "subnetwork": {
+      "Type": "String",
+      "Default": "subnet-d67baeb3",
+      "Description": "Subnet Id"
+    },
+    "keyName": {
+      "Type": "String",
+      "Default": "streaming-server",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    },
+    "apiPort": {
+      "Type": "Number",
+      "Default": 80
+    },
+    "userId": {
+      "Type": "String",
+      "Default": "033814027302",
+      "Description": "user id"
+    },
+    "healthResource": {
+      "Type": "String",
+      "Default": "restapi/health",
+      "Description": "Health resource"
+    }
+  },
   "Resources": {
-    "StreamingConsumerAccessRole": {
+    "ConsumerStreamAccessPolicyUat": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "kinesis:*",
+              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:CreateTable",
+                "dynamodb:DeleteItem",
+                "dynamodb:DeleteTable",
+                "dynamodb:DescribeLimits",
+                "dynamodb:DescribeReservedCapacity",
+                "dynamodb:DescribeReservedCapacityOfferings",
+                "dynamodb:DescribeStream",
+                "dynamodb:DescribeTable",
+                "dynamodb:GetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:ListStreams",
+                "dynamodb:ListTables",
+                "dynamodb:PutItem",
+                "dynamodb:Query",
+                "dynamodb:Scan",
+                "dynamodb:UpdateItem",
+                "dynamodb:UpdateTable"
+              ],
+              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+            }
+          ]
+        },
+        "PolicyName": "a0135-ConsumerStreamAccessPolicyUat",
+        "Roles": [
+          {
+            "Ref": "StreamingConsumerAccessRoleUat"
+          }
+        ]
+      }
+    },
+    "StreamingConsumerAccessRoleUat": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "a0135-StreamingConsumerAccessRole",
+        "RoleName": "a0135-StreamingConsumerAccessRoleUat",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -22,87 +105,19 @@
             }
           ]
         },
-        "Path": "/a0135/",
-        "Policies": [
-          {
-            "PolicyName": "StreamingConsumerOffsetRWAccessPolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Sid": "Stmt1491705809000",
-                  "Effect": "Allow",
-                  "Action": [
-                    "sts:AssumeRole"
-                  ],
-                  "Resource": "arn:aws:iam::500238854089:role/a0135-/*"
-                },
-                {
-                  "Sid": "Stmt1491705809001",
-                  "Effect": "Allow",
-                  "Action": [
-                    "kinesis:CreateStream",
-                    "kinesis:DeleteStream",
-                    "kinesis:DescribeStream",
-                    "kinesis:GetShardIterator",
-                    "kinesis:GetRecords",
-                    "kinesis:ListStreams",
-                    "kinesis:PutRecord",
-                    "kinesis:PutRecords"
-                  ],
-                  "Resource": [
-                    "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
-                  ]
-                },
-                {
-                  "Sid": "Stmt1491705809002",
-                  "Effect": "Allow",
-                  "Action": [
-                    "dynamodb:BatchGetItem",
-                    "dynamodb:BatchWriteItem",
-                    "dynamodb:CreateTable",
-                    "dynamodb:DeleteItem",
-                    "dynamodb:DeleteTable",
-                    "dynamodb:DescribeLimits",
-                    "dynamodb:DescribeReservedCapacity",
-                    "dynamodb:DescribeReservedCapacityOfferings",
-                    "dynamodb:DescribeStream",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:GetItem",
-                    "dynamodb:GetRecords",
-                    "dynamodb:GetShardIterator",
-                    "dynamodb:ListStreams",
-                    "dynamodb:ListTables",
-                    "dynamodb:PutItem",
-                    "dynamodb:Query",
-                    "dynamodb:Scan",
-                    "dynamodb:UpdateItem",
-                    "dynamodb:UpdateTable"
-                  ],
-                  "Resource": [
-                    "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
-                  ]
-                },
-                {
-                  "Sid": "Stmt1491705809003",
-                  "Effect": "Allow",
-                  "Action": [
-                    "cloudwatch:*"
-                  ],
-                  "Resource": [
-                    "*"
-                  ]
-                }
-              ]
-            }
-          }
-        ]
+        "Path": "/a0135/"
       }
     },
-    "ConsumerAPIFirewall": {
+    "ConsumerAPIFirewallUat": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Security group for the Consumer-API",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "ConsumerApiFirewallUat"
+          }
+        ],
         "VpcId": "vpc-6207ff07",
         "SecurityGroupIngress": [
           {
@@ -120,23 +135,23 @@
         ]
       }
     },
-    "StreamingConsumerVMProfile": {
+    "StreamingConsumerVMProfileUat": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/a0135/",
-        "InstanceProfileName": "a0135-StreamingConsumerVMProfile",
+        "InstanceProfileName": "a0135-StreamingConsumerVMProfileUat",
         "Roles": [
-          "a0135-StreamingConsumerAccessRole"
+          "a0135-StreamingConsumerAccessRoleUat"
         ]
       }
     },
-    "StreamingConsumerVM": {
+    "StreamingConsumerVMUat": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-consumer-api"
+            "Value": "a0135-consumer-api-uat"
           },
           {
             "Key": "Owner",
@@ -148,12 +163,12 @@
         "InstanceType": "t2.large",
         "SecurityGroupIds": [
           {
-            "Ref": "ConsumerAPIFirewall"
+            "Ref": "ConsumerAPIFirewallUat"
           }
         ],
         "SubnetId": "subnet-d67baeb3",
         "IamInstanceProfile": {
-          "Ref": "StreamingConsumerVMProfile"
+          "Ref": "StreamingConsumerVMProfileUat"
         },
         "UserData": {
           "Fn::Base64": {
@@ -169,7 +184,7 @@
                 {
                   "Ref": "AWS::StackName"
                 },
-                "         --resource StreamingConsumerVM ",
+                "         --resource StreamingConsumerVMUat ",
                 "         --region ",
                 {
                   "Ref": "AWS::Region"
@@ -200,6 +215,57 @@
               }
             }
           }
+        }
+      }
+    },
+    "consumerApiLBUat": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "SecurityGroups": [
+          {
+            "Ref": "ConsumerAPIFirewallUat"
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "subnetwork"
+          }
+        ],
+        "Scheme": "internal",
+        "Instances": [
+          {
+            "Ref": "StreamingConsumerVMUat"
+          }
+        ],
+        "Listeners": [
+          {
+            "LoadBalancerPort": "80",
+            "InstancePort": {
+              "Ref": "apiPort"
+            },
+            "Protocol": "HTTP"
+          }
+        ],
+        "HealthCheck": {
+          "Target": {
+            "Fn::Join": [
+              "",
+              [
+                "HTTP:",
+                {
+                  "Ref": "apiPort"
+                },
+                "/",
+                {
+                  "Ref": "healthResource"
+                }
+              ]
+            ]
+          },
+          "HealthyThreshold": "3",
+          "UnhealthyThreshold": "5",
+          "Interval": "30",
+          "Timeout": "5"
         }
       }
     }
