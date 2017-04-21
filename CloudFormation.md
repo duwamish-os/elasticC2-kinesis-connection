@@ -36,7 +36,7 @@ aws ec2 describe-security-groups --group-ids sg-1326eb68 --region us-west-2 --pr
                     "Key": "Name"
                 }, 
                 {
-                    "Value": "https://confluence.nordstrom.net/display/AWS/Security+Groups", 
+                    "Value": "https://confluence.nihilos.net/display/AWS/Security+Groups", 
                     "Key": "SGRemediated"
                 }
             ], 

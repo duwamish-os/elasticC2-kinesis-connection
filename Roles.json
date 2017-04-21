@@ -1,0 +1,117 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS Identity Role stack",
+  "Parameters": {
+    "environment": {
+      "Type": "String",
+      "Default": "staging",
+      "Description": "environment"
+    },
+    "vpcId": {
+      "Type": "String",
+      "Default": "vpc-6207ff07",
+      "Description": "Virtual Private Cloud"
+    },
+    "subnetwork": {
+      "Type": "String",
+      "Default": "subnet-d67baeb3",
+      "Description": "Subnet Id"
+    },
+    "teamId": {
+      "Type": "String",
+      "Default": "a0135",
+      "Description": "Team Identifier"
+    },
+    "keyName": {
+      "Type": "String",
+      "Default": "streaming-server",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    }
+   },
+    "Resources": {
+      "StreamAccessPolicyTest": {
+        "Type": "AWS::IAM::Policy",
+        "Properties": {
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": "kinesis:*",
+                "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "dynamodb:BatchGetItem",
+                  "dynamodb:BatchWriteItem",
+                  "dynamodb:CreateTable",
+                  "dynamodb:DeleteItem",
+                  "dynamodb:DeleteTable",
+                  "dynamodb:DescribeLimits",
+                  "dynamodb:DescribeReservedCapacity",
+                  "dynamodb:DescribeReservedCapacityOfferings",
+                  "dynamodb:DescribeStream",
+                  "dynamodb:DescribeTable",
+                  "dynamodb:GetItem",
+                  "dynamodb:GetRecords",
+                  "dynamodb:GetShardIterator",
+                  "dynamodb:ListStreams",
+                  "dynamodb:ListTables",
+                  "dynamodb:PutItem",
+                  "dynamodb:Query",
+                  "dynamodb:Scan",
+                  "dynamodb:UpdateItem",
+                  "dynamodb:UpdateTable"
+                ],
+                "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+              }
+            ]
+          },
+          "PolicyName": "a0135-Kinesis-policy-test",
+          "Roles": [
+            {
+              "Ref": "IngestionAccessMgmtRoleTest"
+            }
+          ]
+        }
+      },
+      "IngestionAccessMgmtRoleTest": {
+        "Type": "AWS::IAM::Role",
+        "Properties": {
+          "RoleName": "a0135-IngestionAccessMgmtRoleTest",
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "ec2.amazonaws.com"
+                  ]
+                },
+                "Action": [
+                  "sts:AssumeRole"
+                ]
+              }
+            ]
+          },
+          "Path": {
+            "Fn::Join": [
+              "/",
+              [
+                "",
+                {
+                  "Ref": "teamId"
+                },
+                {
+                  "Ref": "environment"
+                },
+                ""
+              ]
+            ]
+          }
+        }
+      }
+    } 
+}

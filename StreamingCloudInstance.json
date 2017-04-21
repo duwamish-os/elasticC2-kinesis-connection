@@ -1,49 +1,56 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Ingestion API stack",
+  "Description": "Ingestion API VM stack",
+  "Parameters": {
+    "environment": {
+      "Type": "String",
+      "Default": "staging",
+      "Description": "environment"
+    },
+    "vpcId": {
+      "Type": "String",
+      "Default": "vpc-6207ff07",
+      "Description": "Virtual Private Cloud"
+    },
+    "subnetwork": {
+      "Type": "String",
+      "Default": "subnet-d67baeb3",
+      "Description": "Subnet Id"
+    },
+    "keyName": {
+      "Type": "String",
+      "Default": "streaming-server",
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+    },
+    "apiPort": {
+      "Type": "Number",
+      "Default": 80
+    },
+    "userId" : {
+      "Type" : "String",
+      "Default" : "033814027302",
+      "Description" : "user id"
+    },
+    "healthResource" : {
+      "Type" : "String",
+      "Description" : "Health resource"
+    }
+  },
   "Resources": {
-    "IngestionAccessMgmtRole": {
-      "Type": "AWS::IAM::Role",
+    "StreamAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
       "Properties": {
-        "RoleName": "a0135-IngestionAccessMgmtRole",
-        "AssumeRolePolicyDocument": {
+        "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
             {
               "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "ec2.amazonaws.com"
-                ]
-              },
+              "Action": "kinesis:*",
+              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+            },
+            {
+              "Effect": "Allow",
               "Action": [
-                "sts:AssumeRole"
-              ]
-            }
-          ]
-        },
-        "Path": "/a0135/",
-        "Policies": [
-          {
-            "PolicyName": "IngestionRWAccessPolicy",
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "sts:AssumeRole"
-                  ],
-                  "Resource": "arn:aws:iam::500238854089:role/a0135-/*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": "kinesis:*",
-                  "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:BatchWriteItem",
                 "dynamodb:CreateTable",
@@ -63,44 +70,89 @@
                 "dynamodb:Query",
                 "dynamodb:Scan",
                 "dynamodb:UpdateItem",
-                "dynamodb:UpdateTable"                  
-               ],
-                  "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
-                }
-              ]
+                "dynamodb:UpdateTable"
+              ],
+              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
             }
+          ]
+        },
+        "PolicyName": "a0135-StreamAccessPolicy",
+        "Roles": [
+          {
+            "Ref": "IngestionApiAccessMgmtRole"
           }
         ]
       }
     },
-    "IngestionAPIFirewall" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "GroupDescription" : "Security group for the Ingestion-API",
-        "VpcId" : "vpc-6207ff07",
-        "SecurityGroupIngress" : [
-            {"IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0"},
-            {"IpProtocol" : "tcp", "FromPort" : 22, "ToPort" : 22, "CidrIp" : "10.0.0.0/8"}
+    "IngestionApiAccessMgmtRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "a0135-IngestionApiAccessMgmtRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/a0135/"
+      }
+    },
+    "IngestionApiFirewall": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the Ingestion-API",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "IngestionApiFirewall"
+          }
+        ],
+        "VpcId": {
+          "Ref": "vpcId"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "10.0.0.0/8"
+          }
         ]
       }
     },
-    "IngestionInstanceVMProfile": {
+    "IngestionApiVMProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/a0135/",
-        "InstanceProfileName": "a0135-IngestionInstanceVMProfile",
+        "InstanceProfileName": "a0135-IngestionApiVMProfile",
         "Roles": [
-          "a0135-IngestionAccessMgmtRole"
+          "a0135-IngestionApiAccessMgmtRole"
         ]
       }
     },
-    "IngestionCloudInstance": {
+    "IngestionApiVirtualMachine": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-ingestion-api"
+            "Value": "a0135-ingestion-api-uat"
           },
           {
             "Key": "Owner",
@@ -108,14 +160,61 @@
           }
         ],
         "ImageId": "ami-6f68cf0f",
-        "KeyName": "streaming-server",
+        "KeyName": { "Ref" : "keyName" },
         "InstanceType": "t2.large",
         "SecurityGroupIds": [
-          { "Ref" : "IngestionAPIFirewall" }
+          {
+            "Ref": "IngestionApiFirewall"
+          }
         ],
-        "SubnetId": "subnet-d67baeb3",
+        "SubnetId": { "Ref" : "subnetwork" },
         "IamInstanceProfile": {
-          "Ref": "IngestionInstanceVMProfile"
+          "Ref": "IngestionApiVMProfile"
+        }
+      }
+    },
+    "IngestionApiLB": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "SecurityGroups" : [{ "Ref" : "IngestionApiFirewall" }],
+        "Subnets": [{
+          "Ref": "subnetwork"
+        }],
+        "Scheme": "internal",
+        "Instances": [
+          {
+            "Ref": "IngestionApiVirtualMachine"
+          }
+        ],
+        "Listeners": [
+          {
+            "LoadBalancerPort": "80",
+            "InstancePort": {
+              "Ref": "apiPort"
+            },
+            "Protocol": "HTTP"
+          }
+        ],
+        "HealthCheck": {
+          "Target": {
+            "Fn::Join": [
+              "",
+              [
+                "HTTP:",
+                {
+                  "Ref": "apiPort"
+                },
+                "/",
+                {
+                  "Ref": "healthResource"
+                }
+              ]
+            ]
+          },
+          "HealthyThreshold": "3",
+          "UnhealthyThreshold": "5",
+          "Interval": "30",
+          "Timeout": "5"
         }
       }
     }

@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "vpcId",
+    "ParameterValue": "vpc-6207ff07"
+  }, 
+  {
+    "ParameterKey": "subnetwork",
+    "ParameterValue": "subnet-d67baeb3"
+  },
+  {
+    "ParameterKey": "keyName",
+    "ParameterValue": "streaming-server" 
+  },
+  {
+    "ParameterKey": "healthResource",
+    "ParameterValue": "restapi/health" 
+  }
+]

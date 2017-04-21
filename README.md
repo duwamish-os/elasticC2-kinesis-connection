@@ -8,10 +8,10 @@ elastic compute cloud (ec2) to kinesis-stream connection example
 sudo pip install awscli
 ```
 
-2- [kinesis IAM(Identity and Access Management)](http://docs.aws.amazon.com/streams/latest/dev/learning-kinesis-module-one-iam.html) role - [`StreamOffset-RW-IAM-Role`](https://console.aws.amazon.com/iam/home#/policies$new)
+2- [Kinesis-Stream IAM(Identity and Access Management)](http://docs.aws.amazon.com/streams/latest/dev/learning-kinesis-module-one-iam.html) role - [`StreamOffset-RW-IAM-Role`](https://console.aws.amazon.com/iam/home#/policies$new)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-_difference between role and policy : I think access policies are attached to the Roles?_ 
+_difference between role and policy : individual policies are attached to the Roles?_ 
 
 ```bash
 #first create a Identity role
@@ -41,7 +41,8 @@ aws iam create-policy --policy-name Stream-RW-IAM-Policy --policy-document file:
 aws iam attach-role-policy --role-name Stream-RW-IAM-Role --policy-arn arn:aws:iam::033814027302:policy/Stream-RW-IAM-Policy --profile aws-creds-federated
 ```
 
-create Identity policy for kinesis consumer offset,
+create Identity policy for kinesis consumer offset
+--
 
 ```bash
 $ aws iam create-policy --policy-name ConsumerOffsetRW-Identity-Policy --policy-document file://ConsumerOffset-RW-Policy.json --profile aws-creds-federated
@@ -62,8 +63,6 @@ $ aws iam create-policy --policy-name ConsumerOffsetRW-Identity-Policy --policy-
 # now attach the OffsetTable access policy to the Role, so that Role can be used elsewhere to access the stream as well ConsumerOffset
 aws iam attach-role-policy --role-name StreamOffset-RW-IAM-Role --policy-arn arn:aws:iam::033814027302:policy/ConsumerOffsetRW-Identity-Policy --profile aws-creds-federated
 ```
-
-![](IdentityRoles.png)
 
 ```bash
 aws iam list-roles --profile aws_creds_federated

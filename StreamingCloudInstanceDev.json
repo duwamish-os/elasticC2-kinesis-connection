@@ -1,0 +1,18 @@
+[
+  {
+    "ParameterKey": "vpcId",
+    "ParameterValue": "vpc-5374e434"
+  }, 
+  {
+    "ParameterKey": "subnetwork",
+    "ParameterValue": "subnet-8c7ecbeb"
+  },
+  {
+    "ParameterKey": "keyName",
+    "ParameterValue": "api-staging"    
+  },
+  {
+    "ParameterKey": "healthResource",
+    "ParameterValue": "restapi/health" 
+  }
+]

@@ -1,0 +1,213 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Alert service stack",
+  "Resources": {
+    "AlertServiceAccessRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "a0135-AlertServiceAccessRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/a0135/",
+        "Policies": [
+          {
+            "PolicyName": "AlertServiceRWAccessPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "Stmt1491705809000",
+                  "Effect": "Allow",
+                  "Action": [
+                    "sts:AssumeRole"
+                  ],
+                  "Resource": "arn:aws:iam::500238854089:role/a0135-/*"
+                },
+                {
+                  "Sid": "Stmt1491705809001",
+                  "Effect": "Allow",
+                  "Action": [
+                    "kinesis:CreateStream",
+                    "kinesis:DeleteStream",
+                    "kinesis:DescribeStream",
+                    "kinesis:GetShardIterator",
+                    "kinesis:GetRecords",
+                    "kinesis:ListStreams",
+                    "kinesis:PutRecord",
+                    "kinesis:PutRecords"
+                  ],
+                  "Resource": [
+                    "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+                  ]
+                },
+                {
+                  "Sid": "Stmt1491705809002",
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:CreateTable",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:DeleteTable",
+                    "dynamodb:DescribeLimits",
+                    "dynamodb:DescribeReservedCapacity",
+                    "dynamodb:DescribeReservedCapacityOfferings",
+                    "dynamodb:DescribeStream",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:GetItem",
+                    "dynamodb:GetRecords",
+                    "dynamodb:GetShardIterator",
+                    "dynamodb:ListStreams",
+                    "dynamodb:ListTables",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:UpdateTable"
+                  ],
+                  "Resource": [
+                    "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+                  ]
+                },
+                {
+                  "Sid": "Stmt1491705809003",
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudwatch:*"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AlertServiceFirewallPolicy": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the Alerting service",
+        "VpcId": "vpc-6207ff07",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 9200,
+            "ToPort": 9200,
+            "CidrIp": "10.0.0.0/8"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 5601,
+            "ToPort": 5601,
+            "CidrIp": "10.0.0.0/8"
+          }, 
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "10.0.0.0/8"
+          }
+        ]
+      }
+    },
+    "AlertServiceVirtualMachineProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/a0135/",
+        "InstanceProfileName": "a0135-AlertServiceVirtualMachineProfile",
+        "Roles": [
+          "a0135-AlertServiceAccessRole"
+        ]
+      }
+    },
+    "AlertServiceVirtualMachine": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "a0135-alert-service"
+          },
+          {
+            "Key": "Owner",
+            "Value": "a0135"
+          }
+        ],
+        "ImageId": "ami-a58d0dc5",
+        "KeyName": "streaming-server",
+        "InstanceType": "t2.large",
+        "SecurityGroupIds": [
+          {
+            "Ref": "AlertServiceFirewallPolicy"
+          }
+        ],
+        "SubnetId": "subnet-d67baeb3",
+        "IamInstanceProfile": {
+          "Ref": "AlertServiceVirtualMachineProfile"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum install -y aws-cfn-bootstrap\n",
+                "date > /home/ec2-user/starttime\n",
+                "# Install the files and packages from the metadata\n",
+                "/opt/aws/bin/cfn-init -v ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource StreamingConsumerVM ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "initialise-jvm": [
+              "jvm-setup"
+            ]
+          },
+          "jvm-setup": {
+            "commands": {
+              "root access": {
+                "command": "sudo su -"
+              },
+              "yum update": {
+                "command": "yum -y update"
+              },
+              "install-wget": {
+                "command": "yum -y install wget"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
