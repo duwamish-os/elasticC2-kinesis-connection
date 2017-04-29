@@ -1,15 +1,24 @@
 
+[LB](https://www.rackspace.com/en-us/cloud/load-balancing)
+-----
+
+```
+With an "A" Load Balancer, the LB node that receives the request evaluates the listener rules in priority order 
+to determine which rule to apply, and then selects a target from the target group for 
+the rule action using the round robin routing algorithm.
+```
+
 ```json
 
-aws elb describe-load-balancers --load-balancer-name a0135-po-Ingestio-1JWKPA8NIWNCW --region us-west-2 --profile aws-federated
+aws elb describe-load-balancers --load-balancer-name orders-Ingestio-1JWKPA8NIWNCW --region us-west-2 --profile aws-federated
 {
     "LoadBalancerDescriptions": [
         {
             "Subnets": [
                 "subnet-d67baeb3"
             ], 
-            "CanonicalHostedZoneNameID": "Z1H1FL5HABSF5", 
-            "VPCId": "vpc-6207ff07", 
+            "CanonicalHostedZoneNameID": "Z1H1FL5HABSF5",
+            "VPCId": "vpc-6207ff07",
             "ListenerDescriptions": [
                 {
                     "Listener": {
@@ -34,7 +43,7 @@ aws elb describe-load-balancers --load-balancer-name a0135-po-Ingestio-1JWKPA8NI
                     "InstanceId": "i-0b17f438174c4d254"
                 }
             ], 
-            "DNSName": "internal-a0135-po-Ingestio-1JWKPA8NIWNCW-1550025936.us-west-2.elb.amazonaws.com", 
+            "DNSName": "internal-orders-Ingestio-1JWKPA8NIWNCW-1550025936.us-west-2.elb.amazonaws.com", 
             "SecurityGroups": [
                 "sg-285ee853"
             ], 
@@ -43,15 +52,15 @@ aws elb describe-load-balancers --load-balancer-name a0135-po-Ingestio-1JWKPA8NI
                 "AppCookieStickinessPolicies": [], 
                 "OtherPolicies": []
             }, 
-            "LoadBalancerName": "a0135-po-Ingestio-1JWKPA8NIWNCW", 
+            "LoadBalancerName": "orders-Ingestio-1JWKPA8NIWNCW", 
             "CreatedTime": "2017-04-21T06:48:19.510Z", 
             "AvailabilityZones": [
                 "us-west-2a"
             ], 
-            "Scheme": "internal", 
+            "Scheme": "internal",
             "SourceSecurityGroup": {
                 "OwnerAlias": "500238854089", 
-                "GroupName": "a0135-po-endpoint-uat-IngestionApiFirewall-EPP9UAN6NHKY"
+                "GroupName": "orders-endpoint-uat-IngestionApiFirewall-EPP9UAN6NHKY"
             }
         }
     ]
@@ -61,6 +70,12 @@ aws elb describe-load-balancers --load-balancer-name a0135-po-Ingestio-1JWKPA8NI
 
 Ref
 ----
+
+[How Load Balancing Works/ Routing Algorithm](http://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html)
+
+https://aws.amazon.com/articles/1636185810492479
+
+https://www.rackspace.com/en-us/cloud/load-balancing
 
 http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-elb.html
 

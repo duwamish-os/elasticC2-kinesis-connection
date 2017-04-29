@@ -1,11 +1,11 @@
 [
   {
     "ParameterKey": "vpcId",
-    "ParameterValue": "vpc-6207ff07"
+    "ParameterValue": "vpc-b67a82d3"
   }, 
   {
     "ParameterKey": "subnetworkZone1",
-    "ParameterValue": "subnet-d67baeb3"
+    "ParameterValue": "subnet-8667b2e3"
   },
   {
     "ParameterKey": "keyName",

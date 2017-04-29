@@ -94,7 +94,7 @@ aws iam list-policies --profile aws_creds_federated ## | grep x => will list the
      ]
 }
 
-aws iam list-role-policies --role-name a0135-streaming-access-role-st-StreamingAccessRole-14QHMTIOIRN5X --region us-west-2 --profile aws-federated
+aws iam list-role-policies --role-name streaming-access-role-st-StreamingAccessRole-14QHMTIOIRN5X --region us-west-2 --profile aws-federated
 ```
 
 ```bash
@@ -162,6 +162,8 @@ aws ec2 describe-vpcs --vpc-ids vpc-a77a82c2 --region us-west-2 --profile aws-fe
 # has all the firewall rules for ingress and egress
 
 aws ec2 describe-security-groups --profile aws-creds-federated --region us-west-2
+
+aws ec2 describe-security-groups --region us-west-2 --profile aws-federated --query 'SecurityGroups[*].{Name:GroupName}'
 
 aws ec2 describe-security-groups --group-id sg-5491da2c --region us-west-2 --profile aws-creds-federated
 {
@@ -302,8 +304,11 @@ aws ec2 describe-subnets --subnet-id subnet-bd67b2d8 --profile aws-federated --r
     ]
 }
 
-# create KeyPair
+# [create PP KeyPair and save to a file](http://docs.aws.amazon.com/cli/latest/userguide/cli-ec2-keypairs.html#creating-a-key-pair)
 aws ec2 create-key-pair --region us-west-2 --key-name api-staging --profile aws-creds-federated
+aws ec2 create-key-pair --key-name ingestion-pipe-ppkeys --region us-west-2 --profile aws-creds federated --query 'KeyMaterial' --output text > ingestion-pipe-ppkeys.pem
+
+
 # aws ec2 delete-key-pair --key-name consumer-staging --profile aws-creds-federated --region us-west-2
 # http://stackoverflow.com/a/11776183/432903
 
@@ -741,6 +746,47 @@ aws ec2 start-instances --instance-ids i-0e668c9c64c21f504 --region us-west-2 --
     ]
 }
 ```
+
+
+```bash
+
+aws cloudwatch describe-alarms --alarm-names urayagppd-1JWKPA8NIWNCW-Unhealthy-Hosts --region us-west-2 --profile aws-federated
+{
+    "MetricAlarms": [
+        {
+            "EvaluationPeriods": 1, 
+            "AlarmArn": "arn:aws:cloudwatch:us-west-2:500238854089:alarm:urayagppd-Ingestio-1JWKPA8NIWNCW-Unhealthy-Hosts", 
+            "StateUpdatedTimestamp": "2017-04-25T02:04:02.856Z", 
+            "AlarmConfigurationUpdatedTimestamp": "2017-04-27T09:13:41.309Z", 
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold", 
+            "AlarmActions": [
+                "arn:aws:sns:us-west-2:500238854089:urayagppd-e2e"
+            ], 
+            "Namespace": "AWS/ELB", 
+            "AlarmDescription": "Created from EC2 Console", 
+            "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2017-04-25T02:04:02.846+0000\",\"startDate\":\"2017-04-25T02:03:00.000+0000\",\"statistic\":\"Average\",\"period\":60,\"recentDatapoints\":[0.0],\"threshold\":1.0}", 
+            "Period": 300, 
+            "StateValue": "OK", 
+            "Threshold": 1.0, 
+            "AlarmName": "urayagppd-1JWKPA8NIWNCW-Unhealthy-Hosts", 
+            "Dimensions": [
+                {
+                    "Name": "LoadBalancerName", 
+                    "Value": "urayagppd-1JWKPA8NIWNCW"
+                }
+            ], 
+            "Statistic": "Average", 
+            "StateReason": "Threshold Crossed: 1 datapoint (0.0) was not greater than or equal to the threshold (1.0).", 
+            "InsufficientDataActions": [], 
+            "OKActions": [], 
+            "ActionsEnabled": true, 
+            "MetricName": "UnHealthyHostCount"
+        }
+    ]
+}
+
+```
+
 run artifact on elastic compute
 -------------------------------
 

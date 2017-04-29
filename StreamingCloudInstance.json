@@ -12,7 +12,7 @@
       "Default": "vpc-6207ff07",
       "Description": "Virtual Private Cloud"
     },
-    "subnetwork": {
+    "subnetworkZone1": {
       "Type": "String",
       "Default": "subnet-d67baeb3",
       "Description": "Subnet Id"
@@ -26,14 +26,14 @@
       "Type": "Number",
       "Default": 80
     },
-    "userId" : {
-      "Type" : "String",
-      "Default" : "033814027302",
-      "Description" : "user id"
+    "userId": {
+      "Type": "String",
+      "Default": "033814027302",
+      "Description": "user id"
     },
-    "healthResource" : {
-      "Type" : "String",
-      "Description" : "Health resource"
+    "healthResource": {
+      "Type": "String",
+      "Description": "Health resource"
     }
   },
   "Resources": {
@@ -45,8 +45,17 @@
           "Statement": [
             {
               "Effect": "Allow",
+              "Action": [
+                "cloudwatch:*"
+              ],
+              "Resource": [
+                "*"
+              ]
+            },
+            {
+              "Effect": "Allow",
               "Action": "kinesis:*",
-              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/upd*"
             },
             {
               "Effect": "Allow",
@@ -72,11 +81,11 @@
                 "dynamodb:UpdateItem",
                 "dynamodb:UpdateTable"
               ],
-              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/upd-*"
             }
           ]
         },
-        "PolicyName": "a0135-StreamAccessPolicy",
+        "PolicyName": "upd-StreamAccessPolicy",
         "Roles": [
           {
             "Ref": "IngestionApiAccessMgmtRole"
@@ -87,7 +96,7 @@
     "IngestionApiAccessMgmtRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "a0135-IngestionApiAccessMgmtRole",
+        "RoleName": "upd-IngestionApiAccessMgmtRole",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -104,7 +113,7 @@
             }
           ]
         },
-        "Path": "/a0135/"
+        "Path": "/upd/"
       }
     },
     "IngestionApiFirewall": {
@@ -136,13 +145,42 @@
         ]
       }
     },
+    "IngestionApiLBFirewall": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Security group for the Ingestion-API",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "IngestionApiLBFirewall"
+          }
+        ],
+        "VpcId": {
+          "Ref": "vpcId"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 22,
+            "ToPort": 22,
+            "CidrIp": "10.0.0.0/8"
+          }
+        ]
+      }
+    },
     "IngestionApiVMProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
-        "Path": "/a0135/",
-        "InstanceProfileName": "a0135-IngestionApiVMProfile",
+        "Path": "/upd/",
+        "InstanceProfileName": "upd-IngestionApiVMProfile",
         "Roles": [
-          "a0135-IngestionApiAccessMgmtRole"
+          "upd-IngestionApiAccessMgmtRole"
         ]
       }
     },
@@ -152,22 +190,26 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-ingestion-api-uat"
+            "Value": "upd-ingestion-api-uat"
           },
           {
             "Key": "Owner",
-            "Value": "a0135"
+            "Value": "upd"
           }
         ],
         "ImageId": "ami-6f68cf0f",
-        "KeyName": { "Ref" : "keyName" },
+        "KeyName": {
+          "Ref": "keyName"
+        },
         "InstanceType": "t2.large",
         "SecurityGroupIds": [
           {
             "Ref": "IngestionApiFirewall"
           }
         ],
-        "SubnetId": { "Ref" : "subnetwork" },
+        "SubnetId": {
+          "Ref": "subnetworkZone1"
+        },
         "IamInstanceProfile": {
           "Ref": "IngestionApiVMProfile"
         }
@@ -176,10 +218,16 @@
     "IngestionApiLB": {
       "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
       "Properties": {
-        "SecurityGroups" : [{ "Ref" : "IngestionApiFirewall" }],
-        "Subnets": [{
-          "Ref": "subnetwork"
-        }],
+        "SecurityGroups": [
+          {
+            "Ref": "IngestionApiLBFirewall"
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "subnetworkZone1"
+          }
+        ],
         "Scheme": "internal",
         "Instances": [
           {

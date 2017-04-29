@@ -1,0 +1,86 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+		"Description": "Ingestion API VM stack",
+		"Parameters": {
+			"environment": {
+				"Type": "String",
+				"Default": "test",
+				"Description": "environment"
+			},
+			"vpcId": {
+				"Type": "String",
+				"Default": "vpc-6207ff07",
+				"Description": "Virtual Private Cloud"
+			},
+			"subnetworkZone1": {
+				"Type": "String",
+				"Default": "subnet-d67baeb3",
+				"Description": "Subnet Id"
+			},
+			"keyName": {
+				"Type": "String",
+				"Default": "streaming-server",
+				"Description": "Name of an existing EC2 KeyPair to enable SSH access to the web server"
+			},
+			"apiPort": {
+				"Type": "Number",
+				"Default": 80
+			},
+			"firewallZone1" : {
+				"Type" : "String",
+				"Default" : "sg-9b33e2e0",
+				"Description" : "firewall"
+			},
+			"healthResource" : {
+				"Type" : "String",
+				"Description" : "Health resource"
+			}
+		},
+		"Resources": {
+			"IngestionApiLBFirewallTest": {
+				"Type": "AWS::EC2::SecurityGroup",
+				"Properties": {
+					"GroupDescription": "Security group for the Ingestion-API LB - test",
+					"Tags": [
+					{
+						"Key": "Name",
+						"Value": "IngestionApiLBFirewallTest"
+					}
+					],
+						"VpcId": {
+							"Ref": "vpcId"
+						},
+						"SecurityGroupIngress": [
+						{
+							"IpProtocol": "tcp",
+							"FromPort": 80,
+							"ToPort": 80,
+							"CidrIp": "0.0.0.0/0"
+						},
+						{
+							"IpProtocol": "tcp",
+							"FromPort": 22,
+							"ToPort": 22,
+							"CidrIp": "10.0.0.0/8"
+						}
+					]
+				}
+			},
+			"GregorSamsaE2eLBTest" : {
+				"Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+				"Properties": {
+					"Name" : "GregorSamsaAPITest",
+					"Scheme" : "internal",
+					"Subnets" : [ {"Ref": "subnetworkZone1"}],
+					"LoadBalancerAttributes" : [
+					{ "Key" : "idle_timeout.timeout_seconds", "Value" : "50" }
+					],
+						"SecurityGroups": [{"Ref": "IngestionApiLBFirewallTest"}],
+						"Tags" : [
+						{ "Key" : "Name", "Value" : "GregorSamsaAPITest" },
+						{ "Key" : "Owner", "Value" : "upd" }
+					]
+				}
+			}
+		}
+}

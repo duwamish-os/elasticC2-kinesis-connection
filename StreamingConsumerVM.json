@@ -33,7 +33,6 @@
     },
     "healthResource": {
       "Type": "String",
-      "Default": "restapi/health",
       "Description": "Health resource"
     }
   },
@@ -44,10 +43,19 @@
         "PolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
+           {
+             "Effect": "Allow",
+             "Action": [
+                "cloudwatch:*"
+             ],
+             "Resource": [
+                "*"
+             ]
+            },
             {
               "Effect": "Allow",
               "Action": "kinesis:*",
-              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+              "Resource": "arn:aws:kinesis:us-west-2:500238854089:stream/upd-*"
             },
             {
               "Effect": "Allow",
@@ -73,11 +81,11 @@
                 "dynamodb:UpdateItem",
                 "dynamodb:UpdateTable"
               ],
-              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+              "Resource": "arn:aws:dynamodb:us-west-2:500238854089:table/upd-*"
             }
           ]
         },
-        "PolicyName": "a0135-ConsumerStreamAccessPolicyUat",
+        "PolicyName": "upd-ConsumerStreamAccessPolicyUat",
         "Roles": [
           {
             "Ref": "StreamingConsumerAccessRoleUat"
@@ -88,7 +96,7 @@
     "StreamingConsumerAccessRoleUat": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "a0135-StreamingConsumerAccessRoleUat",
+        "RoleName": "upd-StreamingConsumerAccessRoleUat",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -105,7 +113,7 @@
             }
           ]
         },
-        "Path": "/a0135/"
+        "Path": "/upd/"
       }
     },
     "ConsumerAPIFirewallUat": {
@@ -138,10 +146,10 @@
     "StreamingConsumerVMProfileUat": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
-        "Path": "/a0135/",
-        "InstanceProfileName": "a0135-StreamingConsumerVMProfileUat",
+        "Path": "/upd/",
+        "InstanceProfileName": "upd-StreamingConsumerVMProfileUat",
         "Roles": [
-          "a0135-StreamingConsumerAccessRoleUat"
+          "upd-StreamingConsumerAccessRoleUat"
         ]
       }
     },
@@ -151,11 +159,11 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-consumer-api-uat"
+            "Value": "upd-consumer-api-uat"
           },
           {
             "Key": "Owner",
-            "Value": "a0135"
+            "Value": "upd"
           }
         ],
         "ImageId": "ami-6f68cf0f",
