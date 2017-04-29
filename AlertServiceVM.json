@@ -5,7 +5,7 @@
     "AlertServiceAccessRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": "a0135-AlertServiceAccessRole",
+        "RoleName": "upd-AlertServiceAccessRole",
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
@@ -22,7 +22,7 @@
             }
           ]
         },
-        "Path": "/a0135/",
+        "Path": "/upd/",
         "Policies": [
           {
             "PolicyName": "AlertServiceRWAccessPolicy",
@@ -35,7 +35,7 @@
                   "Action": [
                     "sts:AssumeRole"
                   ],
-                  "Resource": "arn:aws:iam::500238854089:role/a0135-/*"
+                  "Resource": "arn:aws:iam::500238854089:role/upd-/*"
                 },
                 {
                   "Sid": "Stmt1491705809001",
@@ -51,7 +51,7 @@
                     "kinesis:PutRecords"
                   ],
                   "Resource": [
-                    "arn:aws:kinesis:us-west-2:500238854089:stream/a0135-*"
+                    "arn:aws:kinesis:us-west-2:500238854089:stream/upd-*"
                   ]
                 },
                 {
@@ -80,7 +80,7 @@
                     "dynamodb:UpdateTable"
                   ],
                   "Resource": [
-                    "arn:aws:dynamodb:us-west-2:500238854089:table/a0135-*"
+                    "arn:aws:dynamodb:us-west-2:500238854089:table/upd-*"
                   ]
                 },
                 {
@@ -129,10 +129,10 @@
     "AlertServiceVirtualMachineProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
-        "Path": "/a0135/",
-        "InstanceProfileName": "a0135-AlertServiceVirtualMachineProfile",
+        "Path": "/upd/",
+        "InstanceProfileName": "upd-AlertServiceVirtualMachineProfile",
         "Roles": [
-          "a0135-AlertServiceAccessRole"
+          "upd-AlertServiceAccessRole"
         ]
       }
     },
@@ -142,11 +142,11 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "a0135-alert-service"
+            "Value": "upd-alert-service"
           },
           {
             "Key": "Owner",
-            "Value": "a0135"
+            "Value": "upd"
           }
         ],
         "ImageId": "ami-a58d0dc5",
