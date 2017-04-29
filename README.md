@@ -34,7 +34,6 @@ aws iam create-policy --policy-name Stream-RW-IAM-Policy --policy-document file:
 }
 ```
 
-![Kinesis Identity Role](KinesisIAMPolicy.png)
 
 ```bash
 # now attach the Stream access policy to the Role, so that Role can be used elsewhere now to access the stream
