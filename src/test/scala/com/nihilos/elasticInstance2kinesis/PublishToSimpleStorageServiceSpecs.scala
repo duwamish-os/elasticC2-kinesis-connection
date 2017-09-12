@@ -16,7 +16,8 @@ class PublishToSimpleStorageServiceSpecs extends FunSuite with Matchers {
   test("upload to simple storage service and return content length") {
 
     val content = "Send me to storage-service"
-    val uploadedContent = new PublishToSimpleStorageService("samsa-repo", "test-bytes").publish(content)
+
+    val uploadedContent = new PublishToSimpleStorageService("samsa-repo", "samsa-bytes").publish(content)
 
     uploadedContent._1 shouldBe DigestUtils.md5Hex(content.getBytes())
 
@@ -25,7 +26,8 @@ class PublishToSimpleStorageServiceSpecs extends FunSuite with Matchers {
 
   test("sends a file") {
 
-    val uploadedContent = new PublishToSimpleStorageService("samsa-repo", "test-bytes").publish(new File("src/test/resources/sendme.log"))
+    val uploadedContent = new PublishToSimpleStorageService("samsa-repo", "sendme.log")
+      .publish(new File("src/test/resources/sendme.log"))
 
     DigestUtils.md5Hex(new FileInputStream("src/test/resources/sendme.log"))
 

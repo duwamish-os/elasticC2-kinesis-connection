@@ -749,6 +749,7 @@ aws ec2 start-instances --instance-ids i-0e668c9c64c21f504 --region us-west-2 --
 
 ```bash
 
+#ec2 healthcheck alarms
 aws cloudwatch describe-alarms --alarm-names urayagppd-1JWKPA8NIWNCW-Unhealthy-Hosts --region us-west-2 --profile aws-federated
 {
     "MetricAlarms": [
@@ -780,6 +781,42 @@ aws cloudwatch describe-alarms --alarm-names urayagppd-1JWKPA8NIWNCW-Unhealthy-H
             "OKActions": [], 
             "ActionsEnabled": true, 
             "MetricName": "UnHealthyHostCount"
+        }
+    ]
+}
+
+#ec2 alarms
+aws cloudwatch describe-alarms --alarm-names WmAlertService-StatusCheck --region us-west-2 --profile aws-federated
+{
+    "MetricAlarms": [
+        {
+            "EvaluationPeriods": 2, 
+            "AlarmArn": "arn:aws:cloudwatch:us-west-2:051620159240:alarm:WmAlertService-StatusCheck", 
+            "StateUpdatedTimestamp": "2017-05-01T06:45:44.542Z", 
+            "AlarmConfigurationUpdatedTimestamp": "2017-05-01T06:44:49.093Z", 
+            "ComparisonOperator": "GreaterThanOrEqualToThreshold", 
+            "AlarmActions": [
+                "arn:aws:sns:us-west-2:051620159240:a0135-Wm-HealthCheckErrorStream"
+            ], 
+            "Namespace": "AWS/EC2", 
+            "AlarmDescription": "Created from EC2 Console", 
+            "StateReasonData": "{\"version\":\"1.0\",\"queryDate\":\"2017-05-01T06:45:44.533+0000\",\"startDate\":\"2017-05-01T06:44:00.000+0000\",\"statistic\":\"Maximum\",\"period\":60,\"recentDatapoints\":[0.0],\"threshold\":1.0}", 
+            "Period": 60, 
+            "StateValue": "OK", 
+            "Threshold": 1.0, 
+            "AlarmName": "WmAlertService-StatusCheck", 
+            "Dimensions": [
+                {
+                    "Name": "InstanceId", 
+                    "Value": "i-0b13e5c86a36d5168"
+                }
+            ], 
+            "Statistic": "Maximum", 
+            "StateReason": "Threshold Crossed: 1 datapoint (0.0) was not greater than or equal to the threshold (1.0).", 
+            "InsufficientDataActions": [], 
+            "OKActions": [], 
+            "ActionsEnabled": true, 
+            "MetricName": "StatusCheckFailed"
         }
     ]
 }
